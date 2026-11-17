@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Окно вылета</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#0D1626;--s1:#162438;--s2:#1E3046;--bd:#304155;--tx:#F3F6FA;--t2:#A9B7C9;--ac:#79C8DC;--ok:#66CBA8;--mid:#E9B56E;--bad:#E87C82;--unk:#8895A8;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg) radial-gradient(ellipse 70% 260px at 15% 0,rgba(121,200,220,.16),transparent),radial-gradient(ellipse 50% 200px at 85% 0,rgba(121,200,220,.09),transparent) no-repeat;color:var(--tx);font:15px/1.5 Inter,system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.m{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+.w{max-width:1200px;margin:0 auto;padding:0 16px}
+header .w{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px}
+.logo svg{width:26px;fill:var(--ac)}
+nav{display:flex;gap:4px;background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:4px}
+nav a{color:var(--t2);text-decoration:none;padding:9px 14px;border-radius:10px;min-height:44px;display:flex;align-items:center;font-size:14px}
+nav a[aria-current=page]{background:var(--s2);color:var(--tx)}
+h1{font-size:clamp(26px,5vw,36px);margin:20px 0 4px;line-height:1.15}
+h2{font-size:16px;margin:0 0 10px}
+.sub,.t2{color:var(--t2)}
+.small{font-size:13px}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:16px;transition:border-color .2s}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.btn{min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font:inherit;cursor:pointer;transition:background .2s}
+.btn:hover{background:#27405c}
+.btn.pri{background:var(--ac);border-color:var(--ac);color:#06202a;font-weight:600}
+.btn.pri:hover{background:#93d6e6}
+.btn[aria-pressed=true]{background:var(--ac);color:#06202a;border-color:var(--ac)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--t2);background:var(--s2)}
+.st{display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:14px}
+.st b{width:16px;text-align:center;flex:none}
+.c-ok{color:var(--ok)}.c-mid{color:var(--mid)}.c-bad{color:var(--bad)}.c-unk{color:var(--unk)}
+.ap{border-left:4px solid var(--unk)}
+.ap.ok{border-left-color:var(--ok)}.ap.mid{border-left-color:var(--mid)}.ap.bad{border-left-color:var(--bad)}
+.code{font-size:12px;color:var(--t2)}
+.note{padding:10px 14px;border-radius:12px;border:1px solid var(--unk);background:rgba(136,149,168,.12);margin-bottom:16px;font-size:14px}
+.sk{height:150px;border-radius:16px;background:linear-gradient(90deg,var(--s1),var(--s2),var(--s1));background-size:200% 100%;animation:sh 1.4s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+label{display:block;font-size:13px;color:var(--t2);margin-bottom:4px}
+.fld{flex:1 1 180px;min-width:0}
+input,select{width:100%;min-height:44px;background:var(--s2);border:1px solid var(--bd);color:var(--tx);border-radius:12px;padding:0 12px;font:inherit}
+.box{min-height:44px;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px}
+input.err,select.err{border-color:var(--bad)}
+.em{color:var(--bad);font-size:13px;margin-top:4px}
+.sum{border-color:var(--ok);background:linear-gradient(135deg,rgba(102,203,168,.12),var(--s1))}
+.sum.est{border-color:var(--ac)}
+.tl{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;height:96px;margin-top:10px}
+.tl button{border:0;background:rgba(48,65,85,.35);border-radius:4px;padding:0;display:flex;align-items:flex-end;cursor:pointer;min-width:0}
+.tl i{display:block;width:100%;border-radius:4px 4px 2px 2px;background:var(--c);height:var(--h);transition:height .2s}
+.tl button[aria-pressed=true]{outline:2px solid var(--tx);outline-offset:1px}
+.tl.fact button{background:transparent}
+.tl.fact i{height:100%;border-radius:4px;border:2px solid var(--c);background:transparent;opacity:1}
+.tl.fact i.f1{background:var(--c)}
+.tl button.off{opacity:.25;cursor:default}
+.ax{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;font-size:11px;color:var(--t2);margin-top:4px}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--t2);margin-top:10px}
+.leg span:before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px;background:var(--c)}
+.det{margin-top:12px;padding:12px;background:var(--s2);border-radius:12px;font-size:14px}
+.win{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.win .card{margin:0;background:var(--s2)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--t2);font-weight:400;font-size:12px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--bd)}
+.ind{height:8px;border-radius:4px;background:var(--bd);overflow:hidden;min-width:60px}
+.ind i{display:block;height:100%;background:var(--ok)}
+.hs{overflow-x:auto;border-radius:12px;padding-bottom:6px}
+.hm{display:grid;grid-template-columns:44px repeat(var(--n),minmax(var(--cw),1fr));gap:2px;min-width:min-content}
+.hm .h{position:sticky;left:0;background:var(--s1);font-size:11px;color:var(--t2);display:flex;align-items:center;z-index:1}
+.hm .d{font-size:10px;color:var(--t2);text-align:center;line-height:1.2}
+.hm button{height:var(--ch);border:0;border-radius:3px;padding:0;cursor:pointer;background:var(--c)}
+.hm button.nul{background:repeating-linear-gradient(45deg,#3a485b,#3a485b 3px,#222f42 3px,#222f42 6px)}
+.hm button[aria-pressed=true]{outline:2px solid var(--tx);outline-offset:-1px}
+.bars{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;height:120px;align-items:end}
+.bars button{border:0;background:rgba(48,65,85,.35);height:100%;border-radius:4px;display:flex;align-items:flex-end;padding:0;cursor:pointer}
+.bars i{display:block;width:100%;background:var(--ac);border-radius:4px 4px 0 0;height:var(--h)}
+.bars button[aria-pressed=true]{outline:2px solid var(--tx)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+.stats div{background:var(--s2);border-radius:12px;padding:12px}
+.stats b{display:block;font-size:22px;font-weight:500}
+.empty{text-align:center;padding:30px 10px;color:var(--t2)}
+details summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+footer{padding:10px 0 60px}
+@media (max-width:560px){.hm .d{font-size:9px}th.hm-hide,td.hm-hide{display:none}}
+</style>
+</head>
+<body>
+<header><div class="w">
+  <div class="logo"><svg viewBox="0 0 11 8" aria-hidden="true" id="lg"></svg>Окно вылета</div>
+  <nav aria-label="Разделы"><a href="#now">Сейчас</a><a href="#pick">Подобрать время</a><a href="#hist">История</a></nav>
+</div></header>
+<main class="w" id="app"></main>
+<footer class="w"><details class="card"><summary>Как читать данные</summary>
+<p class="t2 small">Факт — то, что уже зафиксировано: отмечается маркером и текстом. История — как часто ограничения встречались в прошлом; это оценка, а не прогноз. Чем меньше наблюдений, тем осторожнее выводы. Все числа и даты в прототипе — пример данных.</p></details></footer>
+<script>
+(function(){
+var AP=[["UFA","Уфа","Уфа"],["SVO","Шереметьево","Москва"],["DME","Домодедово","Москва"],["VKO","Внуково","Москва"],["ZIA","Жуковский","Москва"]];
+var FAC={UFA:1,SVO:.9,DME:1.05,VKO:1.1,ZIA:1.2};
+var P=[.5,.5,.5,.45,.4,.35,.3,.3,.28,.25,.2,.15,.12,.14,.18,.22,.26,.3,.32,.36,.42,.46,.5,.52];
+var LV=["реже","умеренно","чаще"],LC=["ok","mid","bad"];
+var WD=["вс","пн","вт","ср","чт","пт","сб"];
+var DEMO=" · пример данных";
+var S={scen:"clear",det:{},from:"ufa",mair:"all",dmode:"one",date:iso(1),date2:iso(3),dur:"2 ч 20 мин",res:false,busy:false,err:{},t:"main",sel:null,open:null,
+ hair:"UFA",htype:"both",hper:30,htz:"local",page:0,cell:null,bar:null};
+function iso(n){var d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}
+function p2(n){return String(n).padStart(2,"0")}
+function r(n){var x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+function hh(m){m=((m%1440)+1440)%1440;return p2(Math.floor(m/60))+":"+p2(m%60)}
+function lv(f){return f<.25?0:f<.4?1:2}
+function avg(a){return a.reduce(function(x,y){return x+y},0)/a.length}
+function fq(c,h,s){h=((h%24)+24)%24;return Math.min(.9,P[h]*FAC[c]*(.85+.3*r(h*3+s+c.charCodeAt(0))))}
+function dur(){var s=S.dur,m=0,a=s.match(/(\d+)\s*ч/),b=s.match(/(\d+)\s*мин/),c=s.match(/^(\d{1,2}):(\d{2})$/);
+ if(c)m=+c[1]*60+ +c[2];else{if(a)m+=a[1]*60;if(b)m+=+b[1]}return m}
+function route(h,air,seed,dm){var M=air==="all"?["SVO","DME","VKO","ZIA"]:[air],o=S.from==="ufa"?-120:120,t=h*60+dm+o,ah=Math.floor(t/60),dep,arr;
+ if(S.from==="ufa"){dep=fq("UFA",h,seed);arr=avg(M.map(function(m){return fq(m,ah,seed)}))}
+ else{dep=avg(M.map(function(m){return fq(m,h,seed)}));arr=fq("UFA",ah,seed)}
+ return{dep:dep,arr:arr,c:.6*dep+.4*arr,t:t}}
+function day(i){return Math.floor(new Date(i).getTime()/864e5)}
+function fmtd(s){var d=new Date(s+"T12:00");return WD[d.getDay()]+" "+p2(d.getDate())+"."+p2(d.getMonth()+1)}
+function windows(air,seed,dm){var f=[],w=[],i,k,u=[];for(i=0;i<24;i++)f.push(route(i,air,seed,dm).c);
+ for(i=0;i<=21;i++)w.push({s:i,a:avg([f[i],f[i+1],f[i+2]])});w.sort(function(a,b){return a.a-b.a});
+ w.forEach(function(x){if(u.length<3&&u.every(function(y){return Math.abs(y.s-x.s)>=3}))u.push(x)});return u}
+/* ---------- Сейчас ---------- */
+var SC={clear:{},bad:{UFA:["bad","bad","Уже 2 ч 15 мин"]},part:{SVO:["ok","part","По согласованию"],DME:["part","part","С 13:40 МСК"],VKO:["bad","ok","С 13:40 МСК"]}};
+var MK={ok:["●","ok"],bad:["▲","bad"],part:["◐","mid"],unk:["?","unk"]};
+function label(k,d){return k==="ok"?"Ограничения не зафиксированы":k==="bad"?"Есть ограничения на "+d:k==="part"?"Работает с ограничениями":"Нет свежих данных"}
+function nowV(){var st=S.scen==="stale",h='<h1>Аэропорты сейчас</h1><p class="sub">Временные ограничения на приём и выпуск самолётов</p>';
+ h+='<p class="m small t2">'+(st?"Обновлено в 09:05 МСК · 5 ч назад":"Обновлено в 14:20 МСК · 8 минут назад")+' <span class="badge">Пример данных</span></p>';
+ h+='<div class="row small" style="margin-bottom:14px"><span class="t2">Демо-состояние:</span>'+[["clear","Без ограничений"],["bad","Ограничения"],["part","Частичный режим"],["stale","Нет обновления"],["load","Загрузка"]].map(function(x){return'<button class="btn" data-a="scen" data-v="'+x[0]+'" aria-pressed="'+(S.scen===x[0])+'">'+x[1]+'</button>'}).join("")+'</div>';
+ if(st)h+='<div class="note" role="status">Нет свежего обновления. Статусы могут быть неактуальны</div>';
+ h+='<div class="grid" style="margin-bottom:20px">';
+ AP.forEach(function(a){if(S.scen==="load"){h+='<div class="sk" aria-label="Загрузка"></div>';return}
+  var s=st?["unk","unk"]:(SC[S.scen][a[0]]||["ok","ok"]),n=st?"":(SC[S.scen][a[0]]||[])[2],w=s.indexOf("bad")>-1?"bad":s.indexOf("part")>-1?"mid":s.indexOf("unk")>-1?"unk":"ok";
+  h+='<article class="card ap '+w+'" style="margin:0"><h2 style="margin:0">'+a[1]+'</h2><div class="code m">'+a[0]+' · '+a[2]+'</div>';
+  [["Вылет",s[0],"вылет"],["Прилёт",s[1],"прилёт"]].forEach(function(x){var m=MK[x[1]];h+='<div class="st"><b class="c-'+m[1]+'" aria-hidden="true">'+m[0]+'</b><div><span class="t2 small">'+x[0]+'</span><br>'+label(x[1],x[2])+'</div></div>'});
+  if(n)h+='<div class="m small t2">'+n+'</div>';
+  h+='<button class="btn small" style="margin-top:8px;min-height:40px" data-a="det" data-v="'+a[0]+'" aria-expanded="'+!!S.det[a[0]]+'">Подробнее</button>';
+  if(S.det[a[0]])h+='<p class="small t2">Источник: пример данных (демо). Информация обновлена '+(st?"5 ч":"8 минут")+' назад.</p>';
+  h+='</article>'});
+ return h+'</div><div class="row"><a class="btn pri" href="#pick" style="display:inline-flex;align-items:center;text-decoration:none">Подобрать время перелёта →</a><a class="t2" href="#hist">Посмотреть историю ограничений</a></div>'}
+/* ---------- Подобрать время ---------- */
+function tlH(seed,dm,air,id,fact){var h='<div class="tl'+(fact?" fact":"")+'" role="group" aria-label="Часы вылета">',i,now=new Date().getHours();
+ for(i=0;i<24;i++){var o=route(i,air,seed,dm),l=lv(o.c),pr=S.t===id&&S.sel===i?"true":"false";
+  if(fact){var off=i>=now,bad=r(seed*3+i)<o.c,k=bad?"bad":"ok";
+   h+='<button class="'+(off?"off":"")+'" '+(off?"disabled":"")+' data-a="tl" data-t="'+id+'" data-h="'+i+'" aria-pressed="'+pr+'" aria-label="'+p2(i)+':00 '+(bad?"были ограничения":"ограничений не было")+'" style="--c:var(--'+k+')"><i class="'+(bad?"f1":"")+'"></i></button>'}
+  else h+='<button data-a="tl" data-t="'+id+'" data-h="'+i+'" aria-pressed="'+pr+'" aria-label="'+p2(i)+':00, '+LV[l]+'" style="--c:var(--'+LC[l]+');--h:'+(18+o.c*100)+'%"><i></i></button>'}
+ h+='</div><div class="ax" aria-hidden="true">';for(i=0;i<24;i++)h+='<span class="m">'+(i%3===0?p2(i):"")+'</span>';h+='</div>';
+ if(!fact)h+='<div class="leg"><span style="--c:var(--ok)">реже</span><span style="--c:var(--mid)">умеренно</span><span style="--c:var(--bad)">чаще</span><span class="t2">· по прошлым наблюдениям (высота столбца тоже показывает частоту)</span></div>';
+ else h+='<div class="leg"><span style="--c:var(--ok)">ограничений не было</span><span style="--c:var(--bad)">были ограничения</span></div>';
+ if(S.t===id&&S.sel!==null){var o2=route(S.sel,air,seed,dm),n=30+Math.floor(r(seed)*40);
+  var from=S.from==="ufa";h+='<div class="det" role="status"><b class="m">'+p2(S.sel)+':00</b>'+(fact?" — факт: "+(r(seed*3+S.sel)<o2.c?"были ограничения":"ограничений не было"):" — "+LV[lv(o2.c)]+" ограничений по истории")+'<br>Вылет '+hh(S.sel*60)+' · прилёт ≈ '+hh(o2.t)+' (местное время '+(from?"Москвы":"Уфы")+')<br><span class="t2">Дни с ограничениями в этот час: '+(from?"Уфа":"Москва")+' — '+Math.round(o2.dep*100)+'%, '+(from?"Москва":"Уфа")+' — '+Math.round(o2.arr*100)+'% · наблюдений: '+n+' дн.'+DEMO+'</span></div>'}
+ return h}
+function pickV(){var f=S.from==="ufa",e=S.err,h='<h1>Когда лучше лететь?</h1><p class="sub">Сравним время вылета и прилёта по истории ограничений</p>';
+ h+='<section class="card" style="margin-top:16px"><div class="row" style="align-items:flex-end"><div class="fld"><label>Откуда</label><div class="box">'+(f?"Уфа":"Москва")+'</div></div>'+
+ '<button class="btn" data-a="swap" aria-label="Поменять направление" style="min-width:56px">⇄</button><div class="fld"><label>Куда</label><div class="box">'+(f?"Москва":"Уфа")+'</div></div>'+
+ '<div class="fld"><label for="mair">Аэропорт Москвы</label><select id="mair"><option value="all">Сравнить все</option>'+AP.slice(1).map(function(a){return'<option value="'+a[0]+'"'+(S.mair===a[0]?" selected":"")+'>'+a[1]+'</option>'}).join("")+'</select></div></div>'+
+ '<div class="row" style="margin-top:14px"><button class="btn" data-a="dm" data-v="one" aria-pressed="'+(S.dmode==="one")+'">Один день</button><button class="btn" data-a="dm" data-v="range" aria-pressed="'+(S.dmode==="range")+'">Диапазон дат</button></div>'+
+ '<div class="row" style="margin-top:12px;align-items:flex-start"><div class="fld"><label for="date">'+(S.dmode==="one"?"Дата":"С даты")+'</label><input type="date" id="date" value="'+S.date+'" class="'+(e.date?"err":"")+'">'+(e.date?'<div class="em">'+e.date+'</div>':"")+'</div>'+
+ (S.dmode==="range"?'<div class="fld"><label for="date2">По дату</label><input type="date" id="date2" value="'+S.date2+'" class="'+(e.date2?"err":"")+'">'+(e.date2?'<div class="em">'+e.date2+'</div>':"")+'</div>':"")+
+ '<div class="fld"><label for="dur">Продолжительность перелёта</label><input id="dur" value="'+S.dur+'" class="m '+(e.dur?"err":"")+'">'+(e.dur?'<div class="em">'+e.dur+'</div>':'<div class="small t2">Пример, уточните по выбранному рейсу</div>')+'</div></div>'+
+ '<button class="btn pri" data-a="go" style="margin-top:14px">Показать спокойные часы</button></section>';
+ if(S.busy)return h+'<div class="sk"></div>';
+ if(!S.res)return h+disc();
+ var dm=dur(),air=S.mair,td=iso(0),seed=day(S.date);
+ if(S.dmode==="range"){h+='<section class="card"><h2>Дни периода</h2><p class="small t2">Исторический уровень ограничений по дням. Чем меньше наблюдений, тем менее надёжен вывод.'+DEMO+'</p>';
+  var d0=new Date(S.date+"T12:00"),d1=new Date(S.date2+"T12:00"),i=0;
+  for(var d=new Date(d0);d<=d1;d.setDate(d.getDate()+1),i++){var s=d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()),sd=day(s),a=avg([0,3,6,9,12,15,18,21].map(function(x){return route(x,air,sd,dm).c})),l=lv(a),n=12+Math.floor(r(sd)*60),id="d"+i;
+   h+='<div style="border-top:1px solid var(--bd);padding:8px 0"><button class="btn" style="width:100%;text-align:left;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap" data-a="day" data-v="'+id+'" aria-expanded="'+(S.open===id)+'"><span class="m">'+fmtd(s)+'</span><span class="c-'+LC[l]+'">● '+LV[l]+'</span><span class="t2 small">'+n+' дн. наблюдений'+(n<30?" · малая выборка":"")+'</span></button>'+(S.open===id?tlH(sd,dm,air,id,false):"")+'</div>'}
+  h+='</section>';return h+disc()}
+ var fut=S.date>td;
+ if(S.date<td)return h+'<div class="note">Выберите сегодняшнюю или будущую дату.</div>'+disc();
+ var w=windows(air,seed,dm),b=w[0];
+ h+='<section class="card sum '+(fut?"est":"")+'"><span class="badge">'+(fut?"Оценка по истории":"Сегодня")+' · Пример данных</span><h2 style="margin-top:8px">По истории наиболее спокойные часы: <span class="m">'+p2(b.s)+':00–'+p2(b.s+3)+':00</span></h2><p class="t2" style="margin:0">За выбранный период ограничения в эти часы встречались реже. Это не прогноз работы аэропортов на выбранную дату.</p></section>';
+ h+='<section class="card"><h2>'+(S.date===td?"Что происходило сегодня":"Часы вылета · "+fmtd(S.date))+'</h2>';
+ if(S.date===td){h+=tlH(seed,dm,air,"fact",true)+'<h2 style="margin-top:20px">Что показывает история для оставшихся часов</h2>'}
+ h+=tlH(seed,dm,air,"main",false)+'</section>';
+ h+='<section><h2>Исторически спокойные окна</h2><div class="win">'+w.map(function(x){var l=lv(x.a);return'<div class="card"><div class="m" style="font-size:20px">'+p2(x.s)+':00–'+p2(x.s+3)+':00</div><div class="c-'+LC[l]+'">● '+LV[l]+' ограничений</div><div class="small t2">Выборка: '+(30+Math.floor(r(x.s+seed)*40))+' дн.'+DEMO+'</div></div>'}).join("")+'</div></section>';
+ if(air==="all"){h+='<section class="card" style="margin-top:16px"><h2>Московские аэропорты</h2><table><tr><th>Аэропорт</th><th>Лучшее окно</th><th class="hm-hide">Частота</th><th></th></tr>'+AP.slice(1).map(function(a){var ww=windows(a[0],seed,dm)[0],l=lv(ww.a);
+  return'<tr><td>'+a[1]+'</td><td class="m">'+p2(ww.s)+'–'+p2(ww.s+3)+'</td><td class="hm-hide"><div class="ind" role="img" aria-label="'+LV[l]+'"><i style="width:'+Math.round((1-ww.a)*100)+'%"></i></div><span class="small t2">'+LV[l]+'</span></td><td><button class="btn" style="min-height:40px" data-a="cmp" data-v="'+a[0]+'">Посмотреть часы</button></td></tr>'}).join("")+'</table></section>'}
+ return h+disc()}
+function disc(){return'<p class="small t2" style="margin:16px 0">Подсказки основаны на прошлых ограничениях и не предсказывают будущие события. Перед поездкой проверяйте информацию авиакомпании и аэропорта.</p>'}
+/* ---------- История ---------- */
+function hData(){var days=S.hper===0?14:S.hper,N=days*24,a=new Array(N+4).fill(0),ep=[],sd=S.hair.charCodeAt(0)*7+S.htype.length*13+days,pos=0,k=0;
+ while(pos<N){var s=pos+4+Math.floor(r(sd+k*2)*55),l=1+Math.floor(r(sd+k*2+1)*8),j;for(j=s;j<s+l&&j<N+4;j++)a[j]=(l>1&&(j===s||j===s+l-1))?.6:1;ep.push({s:s,l:l});pos=s+l;k++}
+ return{days:days,a:a,ep:ep,off:S.hair==="UFA"&&S.htz==="msk"?2:0}}
+function val(D,d,h){var i=d*24+h;if(d%17===4&&h>=2&&h<=9)return null;return D.a[i+D.off]}
+function histV(){var D=hData(),days=D.days,mob=matchMedia("(max-width:639px)").matches,ps=mob?7:days,pages=Math.ceil(days/7),pg=Math.min(S.page,pages-1),d0=mob?Math.max(0,days-7*(pg+1)):0,n=mob?Math.min(7,days-d0):days,
+ tz=S.hair==="UFA"&&S.htz==="local"?"Уфа":S.hair==="UFA"?"МСК":"МСК",
+ sel=function(k,o,v){return'<div class="fld"><label for="'+k+'">'+o[0]+'</label><select id="'+k+'" data-f="'+k+'">'+o[1].map(function(x){return'<option value="'+x[0]+'"'+(String(v)===String(x[0])?" selected":"")+'>'+x[1]+'</option>'}).join("")+'</select></div>'};
+ var h='<h1>История ограничений</h1><p class="sub">Когда и как долго в аэропортах действовали временные ограничения <span class="badge">Пример данных</span></p><section class="card" style="margin-top:16px"><div class="row" style="align-items:flex-end">'+
+ sel("hair",["Аэропорт",AP.map(function(a){return[a[0],a[1]]})],S.hair)+sel("htype",["Тип",[["dep","Вылет"],["arr","Прилёт"],["both","Оба направления"]]],S.htype)+sel("hper",["Период",[[7,"7 дней"],[30,"30 дней"],[90,"90 дней"],[0,"Свой период"]]],S.hper)+
+ sel("htz",["Время",[["local","Местное ("+(S.hair==="UFA"?"Уфа":"МСК")+")"],["msk","МСК"]]],S.htz)+'</div></section>';
+ if(S.hair==="ZIA"&&S.hper===7)return h+'<div class="card empty"><b>Недостаточно данных</b><br>За выбранный период мало наблюдений. Выберите более длинный период.</div>';
+ h+='<section class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Даты × часы ('+tz+')</h2>'+(mob?'<div class="row"><button class="btn" data-a="pg" data-v="1" '+(pg>=pages-1?"disabled":"")+'>← Предыдущая неделя</button><button class="btn" data-a="pg" data-v="-1" '+(pg<=0?"disabled":"")+'>Следующая →</button></div>':days>30?'<span class="small t2">Прокрутите график вправо ↔</span>':"")+'</div><div class="hs" style="margin-top:10px"><div class="hm" style="--n:'+n+';--cw:'+(mob?"34px":"20px")+';--ch:'+(mob?"20px":"18px")+'"><span></span>';
+ var td=new Date(),i,hr;for(i=0;i<n;i++){var dd=new Date(td);dd.setDate(td.getDate()-(days-1-(d0+i)));h+='<span class="d m">'+(mob?WD[dd.getDay()]+"<br>":"")+p2(dd.getDate())+(mob?"."+p2(dd.getMonth()+1):"")+'</span>'}
+ for(hr=0;hr<24;hr++){h+='<span class="h m">'+p2(hr)+':00</span>';for(i=0;i<n;i++){var d=d0+i,v=val(D,d,hr),on=S.cell&&S.cell.d===d&&S.cell.h===hr;
+  h+='<button data-a="hc" data-d="'+d+'" data-h="'+hr+'" aria-pressed="'+!!on+'" aria-label="День '+(d+1)+', '+p2(hr)+':00" class="'+(v===null?"nul":"")+'" style="--c:'+(v===0?"rgba(102,203,168,.22)":v?"rgba(232,124,130,"+(.35+.65*v)+")":"")+'"></button>'}}
+ h+='</div></div><div class="leg"><span style="--c:rgba(102,203,168,.22)">ограничений не зафиксировано</span><span style="--c:rgba(232,124,130,.6)">часть часа</span><span style="--c:var(--bad)">весь час</span><span style="--c:#3a485b">нет сведений (штриховка)</span></div>';
+ if(S.cell){var c=S.cell,v2=val(D,c.d,c.h),idx=c.d*24+c.h+D.off,e=D.ep.filter(function(x){return idx>=x.s&&idx<x.s+x.l})[0],dt=function(x){var q=new Date(td);q.setDate(td.getDate()-(days-1-Math.floor((x-D.off)/24)));return p2(q.getDate())+"."+p2(q.getMonth()+1)+" "+p2((x-D.off)%24+((x-D.off)%24<0?24:0))+":00"},q0=new Date(td);q0.setDate(td.getDate()-(days-1-c.d));
+  h+='<div class="det" role="status"><b class="m">'+p2(q0.getDate())+"."+p2(q0.getMonth()+1)+", "+p2(c.h)+':00</b> — '+(v2===null?"нет сведений":v2===0?"ограничения не зафиксированы":"ограничения"+(v2<1?" (часть часа)":""))+(e&&v2?'<br><span class="t2">Интервал: '+dt(e.s)+' – '+dt(e.s+e.l)+' · '+e.l+' ч · источник: пример (демо)</span>':"")+'</div>'}
+ h+='</section>';
+ var sh=[],tot=0,cnt=0,mx=0;for(hr=0;hr<24;hr++){var s=0,m=0;for(var d2=0;d2<days;d2++){var vv=val(D,d2,hr);if(vv!==null){s+=vv;m++}}sh.push(m?s/m:0);cnt=m}
+ var mxs=Math.max.apply(null,sh)||1;D.ep.forEach(function(x){tot+=x.l;mx=Math.max(mx,x.l)});
+ h+='<section class="card"><h2>В какие часы ограничения были чаще всего?</h2><div class="bars" role="group">'+sh.map(function(v,k){return'<button data-a="bar" data-h="'+k+'" aria-pressed="'+(S.bar===k)+'" aria-label="'+p2(k)+':00, '+Math.round(v*100)+'% времени" style="--h:'+Math.max(3,v/mxs*100)+'%"><i></i></button>'}).join("")+'</div><div class="ax" aria-hidden="true">'+sh.map(function(v,k){return'<span class="m">'+(k%3===0?p2(k):"")+'</span>'}).join("")+'</div><p class="small t2" style="margin:6px 0 0">Доля времени под ограничениями за период, а не число сообщений.</p>';
+ if(S.bar!==null)h+='<div class="det" role="status"><b class="m">'+p2(S.bar)+':00–'+p2(S.bar+1)+':00</b> — '+Math.round(sh[S.bar]*100)+'% времени за '+days+' дн. · наблюдений: '+cnt+'</div>';
+ h+='<div class="stats"><div><span class="t2 small">Эпизодов</span><b class="m">'+D.ep.length+'</b></div><div><span class="t2 small">Всего под ограничениями</span><b class="m">'+tot+' ч</b></div><div><span class="t2 small">Самый длинный эпизод</span><b class="m">'+mx+' ч</b></div></div></section>';return h}
+/* ---------- роутинг и события ---------- */
+function kf(el){return el?["a","h","t","d","v"].map(function(k){return el.dataset[k]}).join("|"):""}
+function render(){var ae=document.activeElement,k=ae&&ae.dataset&&ae.dataset.a?kf(ae):(ae&&ae.id||""),v=location.hash.slice(1)||"now";
+ document.querySelectorAll("nav a").forEach(function(a){if(a.getAttribute("href")==="#"+v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+ document.getElementById("app").innerHTML=v==="pick"?pickV():v==="hist"?histV():nowV();
+ if(k){var t=document.getElementById(k)||[].filter.call(document.querySelectorAll("[data-a]"),function(x){return kf(x)===k})[0];if(t)t.focus({preventScroll:true})}}
+function readForm(){var g=function(i){var e=document.getElementById(i);return e?e.value:null};if(g("mair"))S.mair=g("mair");if(g("date")!==null)S.date=g("date");if(g("date2"))S.date2=g("date2");if(g("dur")!==null)S.dur=g("dur")}
+document.addEventListener("click",function(e){var b=e.target.closest("[data-a]");if(!b)return;var a=b.dataset.a,v=b.dataset.v;readForm();
+ if(a==="scen")S.scen=v;else if(a==="det")S.det[v]=!S.det[v];else if(a==="swap"){S.from=S.from==="ufa"?"msk":"ufa";S.res=false}
+ else if(a==="dm"){S.dmode=v;S.res=false;S.err={}}
+ else if(a==="go"){var er={};if(!S.date)er.date="Укажите дату";else if(S.date<iso(0))er.date="Выберите сегодняшнюю или будущую дату";
+  if(S.dmode==="range"){if(!S.date2||S.date2<S.date)er.date2="Конец периода должен быть не раньше начала";else if((new Date(S.date2)-new Date(S.date))/864e5>6)er.date2="Не более 7 дней"}
+  if(dur()<=0)er.dur="Укажите время, например 2 ч 20 мин";S.err=er;S.res=false;S.open=null;S.sel=null;
+  if(!Object.keys(er).length){S.busy=true;setTimeout(function(){S.busy=false;S.res=true;S.t="main";S.sel=windows(S.mair,day(S.date),dur())[0].s+1;render()},350)}}
+ else if(a==="tl"){S.t=b.dataset.t;S.sel=+b.dataset.h}else if(a==="day"){S.open=S.open===v?null:v;S.t=v;S.sel=null}
+ else if(a==="cmp"){S.mair=v;S.sel=null;S.t="main"}
+ else if(a==="hc")S.cell={d:+b.dataset.d,h:+b.dataset.h};else if(a==="bar")S.bar=+b.dataset.h;else if(a==="pg")S.page=Math.max(0,S.page+ +v);
+ render()});
+document.addEventListener("change",function(e){var f=e.target.dataset.f;if(f){S[f]=isNaN(e.target.value)?e.target.value:+e.target.value;S.page=0;S.cell=null;S.bar=null;render()}else if(e.target.id==="mair"||e.target.id==="date"||e.target.id==="date2"||e.target.id==="dur"){readForm();S.res=false}});
+window.addEventListener("hashchange",function(){render();scrollTo(0,0)});
+var mq=matchMedia("(max-width:639px)");mq.addEventListener("change",render);
+var art=["..XX...XX..","..XXX.XXX..",".XXXXXXXXX.","XXXXXXXXXXX","XX.XXXXX.XX","XXXXXXXXXXX",".XXXXXXXXX.","..XX...XX.."],g="";
+art.forEach(function(q,y){for(var x=0;x<q.length;x++)if(q[x]==="X")g+='<rect x="'+x+'" y="'+y+'" width="1" height="1"/>'});document.getElementById("lg").innerHTML=g;
+render();
+})();
+</script>
+</body>
+</html>
