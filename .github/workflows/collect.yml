@@ -1,0 +1,34 @@
+name: Collect Rosaviatsia messages
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Rebuild at least 90 days
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: airport-collector
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Collect and persist atomically
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          FULL: ${{ inputs.full }}
+        run: |
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Configure Supabase repository secrets'; exit 1; }
+          if [ "$FULL" = true ]; then npm run collect -- --full; else npm run collect; fi
