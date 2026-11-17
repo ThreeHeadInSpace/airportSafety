@@ -29,7 +29,7 @@ begin
    insert into public.airport_events values((m->>'id')::bigint,e->>'airport',e->>'direction',e->>'state',to_timestamp(coalesce(e->>'effectiveAt',m->>'at')::double precision/1000),coalesce(e->>'timeBasis','publication_estimate'));
   end loop;
  end loop;
- delete from public.airport_intervals;
+ delete from public.airport_intervals where airport in (select code from public.airport_directory);
  for i in select value from jsonb_array_elements(p_payload->'intervals') loop
   insert into public.airport_intervals values(i->>'airport',i->>'direction',i->>'state',to_timestamp((i->>'start')::double precision/1000),case when (i->>'end')::double precision=(p_payload->>'checkedAt')::double precision then null else to_timestamp((i->>'end')::double precision/1000) end,to_timestamp((i->>'end')::double precision/1000),(i->>'durationMs')::bigint,i->>'source');
  end loop;
@@ -44,3 +44,4 @@ create or replace function public.airport_log_failure(p_token text,p_error text)
 end $$;
 revoke all on function public.airport_log_failure(text,text) from public;
 grant execute on function public.airport_log_failure(text,text) to anon,authenticated;
+

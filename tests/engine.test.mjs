@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {rebuild,measure,hourly,routeScore,hour,day,midnight,localDate} from '../public/engine.mjs';
+import {rebuild,measure,hourly,routeScore,episodeStats,hour,day,midnight,localDate} from '../public/engine.mjs';
 import {parseText,parsePage} from '../lib/parser.mjs';
 const msg=(id,at,events)=>({id,at,events,url:`https://t.me/favt_info/${id}`});
 const event=(airport,direction,state)=>({airport,direction,state});
@@ -46,4 +46,16 @@ test('explicit Moscow clock uses previous local day across midnight',()=>{
 });
 test('independent airport blocks do not leak states',()=>{
   const p=parseText('Аэропорт УФА. ВВЕДЕНЫ ограничения на прием и выпуск. Аэропорт ВНУКОВО. СНЯТЫ ограничения на прием и выпуск.');assert.equal(p.events.find(e=>e.airport==='UFA').state,'restricted');assert.equal(p.events.find(e=>e.airport==='VKO').state,'clear');
+});
+test('03:20 through 05:40 distributes 40, 60, 40 minutes',()=>{
+  const start=midnight('2026-11-01',3),I=rebuild([msg(1,start,[event('SVO','dep','clear')]),msg(2,start+(3*60+20)*60000,[event('SVO','dep','restricted')]),msg(3,start+(5*60+40)*60000,[event('SVO','dep','clear')])],start,start+day),b=hourly(I,'SVO','dep',start,start+day);
+  assert.equal(b[3].restricted,40*60000);assert.equal(b[4].restricted,60*60000);assert.equal(b[5].restricted,40*60000);
+});
+test('mode changes and simultaneous directions form a single episode',()=>{
+  const I=rebuild([msg(1,0,[event('UFA','dep','restricted'),event('UFA','arr','restricted')]),msg(2,hour,[event('UFA','dep','partial')]),msg(3,2*hour,[event('UFA','dep','clear'),event('UFA','arr','clear')])],0,3*hour);
+  assert.equal(episodeStats(I,'UFA','both',0,3*hour).count,1);assert.equal(episodeStats(I,'UFA','both',0,3*hour).total,2*hour);
+});
+test('reprocessing edited source replaces the original transition',()=>{
+  const a=msg(1,0,parseText('Аэропорт УФА. ВВЕДЕНЫ ограничения на прием и выпуск.').events),b={...a,events:parseText('Аэропорт УФА. СНЯТЫ ограничения на прием и выпуск.').events};
+  const store=new Map([[a.id,a]]);store.set(b.id,b);const I=rebuild([...store.values()],0,hour);assert.equal(measure(I,'UFA','both',0,hour).share,0);assert.deepEqual(rebuild([...store.values()],0,hour),I);
 });

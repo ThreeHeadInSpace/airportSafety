@@ -62,5 +62,6 @@ export function episodeStats(intervals,airport,direction,from,until){
   const matching=intervals.filter(i=>i.airport===airport&&(direction==='both'||i.direction===direction)&&['restricted','partial'].includes(i.state)&&i.end>from&&i.start<until).map(i=>({start:Math.max(from,i.start),end:Math.min(until,i.end)})).sort((a,b)=>a.start-b.start);
   const episodes=[];for(const i of matching){const last=episodes.at(-1);if(last&&i.start<=last.end)last.end=Math.max(last.end,i.end);else episodes.push({...i});}
   const lengths=episodes.map(i=>i.end-i.start),total=lengths.reduce((a,b)=>a+b,0);
-  return {count:episodes.length,total,average:lengths.length?total/lengths.length:0,longest:Math.max(0,...lengths),episodes};
+  const dates=new Set();for(const e of episodes)for(let t=midnight(localDate(e.start,offset(airport)),offset(airport));t<e.end;t+=day)dates.add(localDate(t,offset(airport)));
+  return {count:episodes.length,total,average:lengths.length?total/lengths.length:0,longest:Math.max(0,...lengths),days:dates.size,episodes};
 }
