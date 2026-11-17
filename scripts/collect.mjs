@@ -1,6 +1,7 @@
 import {parsePage} from '../lib/parser.mjs';
 import {rebuild,day} from '../public/engine.mjs';
-import {readSnapshot,writeSnapshot} from '../lib/store.mjs';
+import {readSnapshot,writeSnapshot,logFailure} from '../lib/store.mjs';
+process.on('uncaughtException',async error=>{console.error(error.message);try{await logFailure(error.message);}finally{process.exit(1);}});
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 const exec=promisify(execFile);

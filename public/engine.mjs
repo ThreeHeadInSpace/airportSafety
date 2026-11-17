@@ -8,13 +8,12 @@ export function rebuild(messages, from, until) {
   const intervals=[];
   for(const [airport] of airports) for(const direction of ['dep','arr']) {
     let state='unknown',start=from,source=null;
-    for(const msg of [...messages].sort((a,b)=>a.at-b.at||a.id-b.id)) {
-      for(const event of msg.events.filter(e=>e.airport===airport&&e.direction===direction)) {
-        if(msg.at>until) continue;
+    const ordered=messages.flatMap(msg=>msg.events.filter(e=>e.airport===airport&&e.direction===direction).map(event=>({msg,event,at:event.effectiveAt??msg.at}))).sort((a,b)=>a.at-b.at||a.msg.id-b.msg.id);
+    for(const {msg,event,at} of ordered) {
+        if(at>until) continue;
         if(event.state===state) continue;
-        if(msg.at>start) intervals.push({airport,direction,state,start,end:msg.at,source,durationMs:msg.at-start});
-        start=Math.max(from,msg.at);state=event.state;source=msg.url;
-      }
+        if(at>start) intervals.push({airport,direction,state,start,end:at,source,durationMs:at-start});
+        start=Math.max(from,at);state=event.state;source=msg.url;
     }
     if(start<until) intervals.push({airport,direction,state,start,end:until,source,durationMs:until-start});
   }
@@ -44,7 +43,7 @@ export function hourly(intervals,airport,direction,from,until,off=offset(airport
 // Pair the same historical departure day with its arrival after elapsed flight time.
 // Only jointly observed minutes contribute; overlapping restrictions count once.
 export function routeScore(intervals,fromAirport,toAirport,h,minutes,from,until,targetDate=null) {
-  const off=offset(fromAirport),shift=minutes*60000;let known=0,restricted=0,samples=0;
+  const off=offset(fromAirport),shift=minutes*60000;let known=0,restricted=0,depRestricted=0,arrRestricted=0,samples=0;
   const first=midnight(localDate(from,off),off);
   for(let d=first;d<until;d+=day){
     if(targetDate&&new Date(d+off*hour).getUTCDay()!==new Date(targetDate+'T12:00:00Z').getUTCDay())continue;
@@ -54,8 +53,14 @@ export function routeScore(intervals,fromAirport,toAirport,h,minutes,from,until,
     const cuts=[...new Set([a,b,...dep.concat(arr).flatMap(i=>[Math.max(a,i.start),Math.min(b,i.end)])])].sort((x,y)=>x-y);let daily=0;
     for(let n=1;n<cuts.length;n++) {const x=cuts[n-1],y=cuts[n],p=dep.find(i=>i.start<=x&&i.end>=y),q=arr.find(i=>i.start<=x&&i.end>=y);
       if(!p||!q||p.state==='unknown'||q.state==='unknown')continue;
-      known+=y-x;daily+=y-x;if(p.state!=='clear'||q.state!=='clear')restricted+=y-x;
+      known+=y-x;daily+=y-x;if(p.state!=='clear'||q.state!=='clear')restricted+=y-x;if(p.state!=='clear')depRestricted+=y-x;if(q.state!=='clear')arrRestricted+=y-x;
     }if(daily)samples++;
   }
-  return {share:known?restricted/known:null,known,restricted,samples};
+  return {share:known?restricted/known:null,depShare:known?depRestricted/known:null,arrShare:known?arrRestricted/known:null,known,restricted,samples};
+}
+export function episodeStats(intervals,airport,direction,from,until){
+  const matching=intervals.filter(i=>i.airport===airport&&(direction==='both'||i.direction===direction)&&['restricted','partial'].includes(i.state)&&i.end>from&&i.start<until).map(i=>({start:Math.max(from,i.start),end:Math.min(until,i.end)})).sort((a,b)=>a.start-b.start);
+  const episodes=[];for(const i of matching){const last=episodes.at(-1);if(last&&i.start<=last.end)last.end=Math.max(last.end,i.end);else episodes.push({...i});}
+  const lengths=episodes.map(i=>i.end-i.start),total=lengths.reduce((a,b)=>a+b,0);
+  return {count:episodes.length,total,average:lengths.length?total/lengths.length:0,longest:Math.max(0,...lengths),episodes};
 }

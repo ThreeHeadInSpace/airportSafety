@@ -27,8 +27,9 @@ jobs:
       - name: Collect and persist atomically
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_INGEST_TOKEN: ${{ secrets.SUPABASE_INGEST_TOKEN }}
           FULL: ${{ inputs.full }}
         run: |
-          test -n "$SUPABASE_URL" && test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo 'Configure Supabase repository secrets'; exit 1; }
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_ANON_KEY" && test -n "$SUPABASE_INGEST_TOKEN" || { echo 'Configure Supabase repository secrets'; exit 1; }
           if [ "$FULL" = true ]; then npm run collect -- --full; else npm run collect; fi

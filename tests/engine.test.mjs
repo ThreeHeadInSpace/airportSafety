@@ -38,6 +38,12 @@ test('complex and conflicting text marks status unknown',()=>{
 test('partial mode is retained separately from full restrictions',()=>{
   const p=parseText('Аэропорт ШЕРЕМЕТЬЕВО. Прием воздушных судов по согласованию.');assert.deepEqual(p.events,[event('SVO','arr','partial')]);
 });
+test('actual Rosaviatsia agreement wording applies to both directions',()=>{
+  const p=parseText('Аэропорт ВНУКОВО\nпринимает и отправляет рейсы по согласованию с соответствующими органами в связи с введением временных ограничений на использование воздушного пространства.');assert.equal(p.review,false);assert.equal(p.events.length,2);assert.ok(p.events.every(e=>e.state==='partial'));
+});
+test('explicit Moscow clock uses previous local day across midnight',()=>{
+  const at=Date.parse('2026-11-17T00:10:00+03:00'),p=parseText('Аэропорт УФА. С 23:40 МСК введены ограничения на прием и выпуск.',at);assert.equal(p.review,false);assert.equal(p.events[0].effectiveAt,Date.parse('2026-11-16T23:40:00+03:00'));assert.equal(p.events[0].timeBasis,'explicit_msk');
+});
 test('independent airport blocks do not leak states',()=>{
   const p=parseText('Аэропорт УФА. ВВЕДЕНЫ ограничения на прием и выпуск. Аэропорт ВНУКОВО. СНЯТЫ ограничения на прием и выпуск.');assert.equal(p.events.find(e=>e.airport==='UFA').state,'restricted');assert.equal(p.events.find(e=>e.airport==='VKO').state,'clear');
 });
